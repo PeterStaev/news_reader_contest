@@ -1,0 +1,25 @@
+.Paragraph
+, .List
+, .Header
+, .Crosshead
+, Image
+{
+    margin-bottom: 10;
+}
+
+.Header
+{
+    font-weight: bold;
+    font-size: 18;
+}
+
+.Crosshead
+{
+    font-weight: bold;
+    font-size: 15;
+}
+
+.List
+{
+    margin-left: 18;
+}

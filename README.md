@@ -16,4 +16,9 @@ Here are the parameters:
 - Tell me about it when you're done (@jenlooper)
 - WIN A PRIZE!
 
+### TODO
+* Make Links Work
+* Add Video support
+
+
 

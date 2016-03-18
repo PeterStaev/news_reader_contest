@@ -1,0 +1,17 @@
+<Page xmlns="http://schemas.nativescript.org/tns.xsd" navigatingTo="onNavigatingTo">
+    <ActionBar title="Feed" backgroundColor="#BB1919" color="#FFFFFF" />
+    
+    <GridLayout>
+        <ListView items="{{ items }}" itemTap="goToItem" separatorColor="#BB1919">
+            <ListView.itemTemplate>
+                <GridLayout rows="150,auto,auto" columns="*,*" class="Container">
+                    <Image row="0" col="0" colSpan="2" src="{{ imageHref }}" stretch="aspectFill" />
+                    <Label row="1" col="0" colSpan="2" class="Title" text="{{ title }}" />
+                    <Label row="2" col="0" class="Date" text="{{ lastUpdateDate | diffFormat() }}" />
+                    <Label row="2" col="1" class="Category" text="{{ category.name }}" />
+                </GridLayout>
+            </ListView.itemTemplate>
+        </ListView>
+        <ActivityIndicator busy="{{ isLoadingIn }}" />
+    </GridLayout>
+</Page>

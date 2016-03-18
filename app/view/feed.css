@@ -1,0 +1,22 @@
+.Container
+{
+    margin: 10;
+}
+
+.Title
+{
+    font-size: 18;
+    font-weight: bold;
+}
+
+.Date
+, .Category
+{
+    font-size: 12;
+}
+
+.Category
+{
+    color: #bb1919;
+    horizontal-align: right;
+}

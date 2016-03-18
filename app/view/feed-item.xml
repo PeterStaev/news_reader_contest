@@ -1,0 +1,5 @@
+<Page xmlns="http://schemas.nativescript.org/tns.xsd" navigatingTo="onNavigatingTo">
+    <ActionBar title="{{ title }}"  backgroundColor="#BB1919" color="#FFFFFF" />
+    
+    <ScrollView id="sv" margin="10"></ScrollView>
+</Page>
