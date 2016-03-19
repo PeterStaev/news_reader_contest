@@ -7,10 +7,18 @@ import { Color } from "color";
 import { FormattedString } from "text/formatted-string";
 import xml = require("xml");
 
+export interface NewsUrl {
+    start?:number;
+    length?: number;
+    href?: string;
+    platform?: "highweb" | "newsapps" | "enhancedmobile";
+}
+
 export class ParseHelper {
-    public static structure: Array<any>;
+    public static structure: Array<any> = [];
     public static relations: Array<any>;
-    private static _isUrlIn = false;
+    private static _urls: Array<NewsUrl>
+    private static _isCaptionIn = false;
     
     private static _getImageSourceFromRelations(id: string) {
         let src = "";
@@ -25,8 +33,12 @@ export class ParseHelper {
     }
     
     private static _handleStartElement(elementName: string, attr: any) {
+        let structureTop = ParseHelper.structure[ParseHelper.structure.length - 1];
+        
         switch (elementName) {
             case "body":
+                ParseHelper.structure = [];
+                
                 let body = new StackLayout();
                 body.orientation = enums.Orientation.vertical; 
                 ParseHelper.structure.push(body);
@@ -55,8 +67,8 @@ export class ParseHelper {
                 
             case "italic":
                 let si: Span;
-                if (ParseHelper.structure[ParseHelper.structure.length - 1] instanceof Span) {
-                    si = ParseHelper.structure[ParseHelper.structure.length - 1];
+                if (structureTop instanceof Span) {
+                    si = structureTop;
                 }
                 else {
                     si = new Span();
@@ -67,8 +79,8 @@ export class ParseHelper {
 
             case "bold":
                 let sb: Span;
-                if (ParseHelper.structure[ParseHelper.structure.length - 1] instanceof Span) {
-                    sb = ParseHelper.structure[ParseHelper.structure.length - 1];
+                if (structureTop instanceof Span) {
+                    sb = structureTop;
                 }
                 else {
                     sb = new Span();
@@ -79,14 +91,24 @@ export class ParseHelper {
                 break; 
                 
             case "link":
+                if (!ParseHelper._urls) {
+                    ParseHelper._urls = [];
+                }
                 let link = new Span();
                 link.underline = 1;
                 link.foregroundColor = new Color("#BB1919");
-                ParseHelper.structure.push(link)
+                ParseHelper.structure.push(link);
+                ParseHelper._urls.push({start: (<Label>structureTop).formattedText.toString().length});
                 break;
             
             case "url":
-                ParseHelper._isUrlIn = true;
+                let lastUrl = ParseHelper._urls[ParseHelper._urls.length - 1];
+                lastUrl.platform = attr.platform;
+                lastUrl.href = attr.href;
+                break;
+                
+            case "caption":
+                ParseHelper._isCaptionIn = true;
                 break;
                 
             case "image":
@@ -146,13 +168,17 @@ export class ParseHelper {
                 if (ParseHelper.structure[ParseHelper.structure.length - 1] instanceof Span) {
                     let link: Span = ParseHelper.structure.pop();
                     (<Label>ParseHelper.structure[ParseHelper.structure.length - 1]).formattedText.spans.push(link);
-                    break;
+                    if (ParseHelper._urls) {
+                        (<Label>ParseHelper.structure[ParseHelper.structure.length - 1]).bindingContext = ParseHelper._urls.slice();
+                        ParseHelper._urls = null;
+                    }
                 }
-                
-            case "url":
-                ParseHelper._isUrlIn = false;
                 break;
                 
+            case "caption":
+                ParseHelper._isCaptionIn = false;
+                break;
+
             case "list":
                 let sl: StackLayout = ParseHelper.structure.pop();
                 (<StackLayout>ParseHelper.structure[ParseHelper.structure.length - 1]).addChild(sl);
@@ -160,20 +186,20 @@ export class ParseHelper {
         }
     }
     private static _handleText(text: string) {
-        if (text === "") return;
+        if (text.trim() === "") return;
         
         let structureTop = ParseHelper.structure[ParseHelper.structure.length - 1];
         
-        if (ParseHelper._isUrlIn) {
-            // TODO
-        }
-        else if (structureTop instanceof Label) {
+        if (structureTop instanceof Label) {
             let span = new Span();
             span.text = text;
             (<Label>structureTop).formattedText.spans.push(span);
         }
         else if (structureTop instanceof Span) {
             (<Span>structureTop).text = text;
+            if (ParseHelper._isCaptionIn) {
+                ParseHelper._urls[ParseHelper._urls.length - 1].length = text.length;
+            }
         }
         else {
             console.log("UNKNOWN TOP", structureTop);

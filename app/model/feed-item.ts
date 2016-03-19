@@ -17,12 +17,10 @@ export class FeedItemModel extends Observable {
         return new Promise<View>((resolve, reject) => {
             http.getJSON(`http://trevor-producer-cdn.api.bbci.co.uk/content${this.get("id")}`).then((res: any) => {
                 let parser = new xml.XmlParser(ParseHelper.xmlParserCallback, (error) => { console.log(`ERROR PARSE: ${error.message}`)});
-
-                ParseHelper.structure = [];
                 ParseHelper.relations = res.relations;
                 parser.parse(res.body);
                 
-                console.log("FINISHED");
+                this.set("title", res.shortName);
                 this.set("isLoadingIn", false);
                 resolve(ParseHelper.structure[0]);
             });

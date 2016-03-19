@@ -21,8 +21,10 @@ var ParseHelper = (function () {
         }
     };
     ParseHelper._handleStartElement = function (elementName, attr) {
+        var structureTop = ParseHelper.structure[ParseHelper.structure.length - 1];
         switch (elementName) {
             case "body":
+                ParseHelper.structure = [];
                 var body = new stack_layout_1.StackLayout();
                 body.orientation = enums.Orientation.vertical;
                 ParseHelper.structure.push(body);
@@ -48,8 +50,8 @@ var ParseHelper = (function () {
                 break;
             case "italic":
                 var si = void 0;
-                if (ParseHelper.structure[ParseHelper.structure.length - 1] instanceof span_1.Span) {
-                    si = ParseHelper.structure[ParseHelper.structure.length - 1];
+                if (structureTop instanceof span_1.Span) {
+                    si = structureTop;
                 }
                 else {
                     si = new span_1.Span();
@@ -59,8 +61,8 @@ var ParseHelper = (function () {
                 break;
             case "bold":
                 var sb = void 0;
-                if (ParseHelper.structure[ParseHelper.structure.length - 1] instanceof span_1.Span) {
-                    sb = ParseHelper.structure[ParseHelper.structure.length - 1];
+                if (structureTop instanceof span_1.Span) {
+                    sb = structureTop;
                 }
                 else {
                     sb = new span_1.Span();
@@ -69,13 +71,22 @@ var ParseHelper = (function () {
                 sb.fontAttributes = sb.fontAttributes | enums.FontAttributes.Bold;
                 break;
             case "link":
-                var link = new span_1.Span();
-                link.underline = 1;
-                link.foregroundColor = new color_1.Color("#BB1919");
-                ParseHelper.structure.push(link);
+                if (!ParseHelper._urls) {
+                    ParseHelper._urls = [];
+                }
+                var link_1 = new span_1.Span();
+                link_1.underline = 1;
+                link_1.foregroundColor = new color_1.Color("#BB1919");
+                ParseHelper.structure.push(link_1);
+                ParseHelper._urls.push({ start: structureTop.formattedText.toString().length });
                 break;
             case "url":
-                ParseHelper._isUrlIn = true;
+                var lastUrl = ParseHelper._urls[ParseHelper._urls.length - 1];
+                lastUrl.platform = attr.platform;
+                lastUrl.href = attr.href;
+                break;
+            case "caption":
+                ParseHelper._isCaptionIn = true;
                 break;
             case "image":
                 var img = new image_1.Image();
@@ -124,12 +135,16 @@ var ParseHelper = (function () {
             case "link":
                 // Added check for nested bold/italic tags
                 if (ParseHelper.structure[ParseHelper.structure.length - 1] instanceof span_1.Span) {
-                    var link = ParseHelper.structure.pop();
-                    ParseHelper.structure[ParseHelper.structure.length - 1].formattedText.spans.push(link);
-                    break;
+                    var link_2 = ParseHelper.structure.pop();
+                    ParseHelper.structure[ParseHelper.structure.length - 1].formattedText.spans.push(link_2);
+                    if (ParseHelper._urls) {
+                        ParseHelper.structure[ParseHelper.structure.length - 1].bindingContext = ParseHelper._urls.slice();
+                        ParseHelper._urls = null;
+                    }
                 }
-            case "url":
-                ParseHelper._isUrlIn = false;
+                break;
+            case "caption":
+                ParseHelper._isCaptionIn = false;
                 break;
             case "list":
                 var sl = ParseHelper.structure.pop();
@@ -138,18 +153,19 @@ var ParseHelper = (function () {
         }
     };
     ParseHelper._handleText = function (text) {
-        if (text === "")
+        if (text.trim() === "")
             return;
         var structureTop = ParseHelper.structure[ParseHelper.structure.length - 1];
-        if (ParseHelper._isUrlIn) {
-        }
-        else if (structureTop instanceof label_1.Label) {
+        if (structureTop instanceof label_1.Label) {
             var span = new span_1.Span();
             span.text = text;
             structureTop.formattedText.spans.push(span);
         }
         else if (structureTop instanceof span_1.Span) {
             structureTop.text = text;
+            if (ParseHelper._isCaptionIn) {
+                ParseHelper._urls[ParseHelper._urls.length - 1].length = text.length;
+            }
         }
         else {
             console.log("UNKNOWN TOP", structureTop);
@@ -173,7 +189,8 @@ var ParseHelper = (function () {
             console.log("ERROR", e);
         }
     };
-    ParseHelper._isUrlIn = false;
+    ParseHelper.structure = [];
+    ParseHelper._isCaptionIn = false;
     return ParseHelper;
 }());
 exports.ParseHelper = ParseHelper;

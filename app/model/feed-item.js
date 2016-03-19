@@ -17,10 +17,9 @@ var FeedItemModel = (function (_super) {
         return new Promise(function (resolve, reject) {
             http.getJSON("http://trevor-producer-cdn.api.bbci.co.uk/content" + _this.get("id")).then(function (res) {
                 var parser = new xml.XmlParser(parse_helper_1.ParseHelper.xmlParserCallback, function (error) { console.log("ERROR PARSE: " + error.message); });
-                parse_helper_1.ParseHelper.structure = [];
                 parse_helper_1.ParseHelper.relations = res.relations;
                 parser.parse(res.body);
-                console.log("FINISHED");
+                _this.set("title", res.shortName);
                 _this.set("isLoadingIn", false);
                 resolve(parse_helper_1.ParseHelper.structure[0]);
             });
