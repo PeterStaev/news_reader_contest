@@ -16,6 +16,11 @@ Here are the parameters:
 - Tell me about it when you're done (@jenlooper)
 - WIN A PRIZE!
 
+### Screenshots
+![iOS](pics/ios.png?raw=true)
+
+![android](pics/ios.png?raw=true)
+
 ### TODO
 * Make Links Work
 * Add Video support
