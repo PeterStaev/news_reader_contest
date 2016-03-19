@@ -8,7 +8,7 @@ export class FeedItemModel extends Observable {
     constructor(id: string, title: string) {
         super();
         this.set("id", id);
-        this.set("title", title);
+        this.set("title", title || "");
         this.set("isLoadingIn", false);
     }
     

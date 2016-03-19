@@ -16,28 +16,18 @@ export function onNavigatingTo(args: NavigatedData) {
 
     page.bindingContext = model;
     model.loadData().then(view => { 
-        if (platform.device.os === platform.platformNames.ios) {
-            viewModule.eachDescendant(view, (child) => {
-                if (child instanceof Label) {
-                    (<Label>child).on(gestures.GestureTypes.tap, onLabelTap);
-                }
-                return true;
-            });
-        }
+        viewModule.eachDescendant(view, (child) => {
+            if (child instanceof Label) {
+                (<Label>child).on(gestures.GestureTypes.tap, 
+                    (platform.device.os === platform.platformNames.ios ? onLabelTapIos : onLabelTapAndroid));
+            }
+            return true;
+        });
         sv.content = view;
     });
 }
 
-function openMobileFeedItem(id: string) {
-   frame.topmost().navigate({
-        moduleName: "view/feed-item", 
-        context: {
-            id: id
-        }
-    }); 
-}
-
-function onLabelTap(args: gestures.GestureEventData) {
+function onLabelTapIos(args: gestures.GestureEventData) {
     let label: UILabel = (<Label>args.object).ios;
     let urls: Array<NewsUrl> = (<Label>args.object).bindingContext;
     let fixedAttributedText: NSMutableAttributedString = NSMutableAttributedString.alloc().initWithAttributedString(label.attributedText);
@@ -59,12 +49,37 @@ function onLabelTap(args: gestures.GestureEventData) {
     let indexOfCharacter = 
         layoutManager.glyphIndexForPointInTextContainer(locationOfTouchInLabel, textContainer);
         
+    openUrlAtCharIndex(urls, indexOfCharacter);
+}
+
+function onLabelTapAndroid(args: gestures.GestureEventData) {
+    let motionEvent: android.view.MotionEvent = args.android;
+    let label = <Label>args.object;
+    let urls: Array<NewsUrl> = label.bindingContext;
+    let layout = (<android.widget.TextView>label.android).getLayout();
+    let x = motionEvent.getX();
+    let y = motionEvent.getY();
+    
+    if (layout) {
+        let line = layout.getLineForVertical(y);
+        let index = layout.getOffsetForHorizontal(line, x);
+        
+        openUrlAtCharIndex(urls, index);
+    }
+}
+
+function openUrlAtCharIndex(urls: Array<NewsUrl>, charIndex: number) {
     for (let loop = 0; loop < urls.length; loop++) {
         let url = urls[loop];
-        if (indexOfCharacter >= url.start && indexOfCharacter < url.start + url.length) {
+        if (charIndex >= url.start && charIndex < url.start + url.length) {
             switch (url.platform) {
                 case "newsapps":
-                    openMobileFeedItem(url.href);
+                    frame.topmost().navigate({
+                        moduleName: "view/feed-item", 
+                        context: {
+                            id: url.href
+                        }
+                    }); 
                     break;
                     
                 case "highweb":

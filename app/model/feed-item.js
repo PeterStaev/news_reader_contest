@@ -8,7 +8,7 @@ var FeedItemModel = (function (_super) {
     function FeedItemModel(id, title) {
         _super.call(this);
         this.set("id", id);
-        this.set("title", title);
+        this.set("title", title || "");
         this.set("isLoadingIn", false);
     }
     FeedItemModel.prototype.loadData = function () {

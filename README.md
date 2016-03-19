@@ -22,7 +22,6 @@ Here are the parameters:
 ![android](pics/android.png?raw=true)
 
 ### TODO
-* Make Links Work
 * Add Video support
 
 

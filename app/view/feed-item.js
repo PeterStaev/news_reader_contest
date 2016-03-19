@@ -12,27 +12,17 @@ function onNavigatingTo(args) {
     var sv = page.getViewById("sv");
     page.bindingContext = model;
     model.loadData().then(function (view) {
-        if (platform.device.os === platform.platformNames.ios) {
-            viewModule.eachDescendant(view, function (child) {
-                if (child instanceof label_1.Label) {
-                    child.on(gestures.GestureTypes.tap, onLabelTap);
-                }
-                return true;
-            });
-        }
+        viewModule.eachDescendant(view, function (child) {
+            if (child instanceof label_1.Label) {
+                child.on(gestures.GestureTypes.tap, (platform.device.os === platform.platformNames.ios ? onLabelTapIos : onLabelTapAndroid));
+            }
+            return true;
+        });
         sv.content = view;
     });
 }
 exports.onNavigatingTo = onNavigatingTo;
-function openMobileFeedItem(id) {
-    frame.topmost().navigate({
-        moduleName: "view/feed-item",
-        context: {
-            id: id
-        }
-    });
-}
-function onLabelTap(args) {
+function onLabelTapIos(args) {
     var label = args.object.ios;
     var urls = args.object.bindingContext;
     var fixedAttributedText = NSMutableAttributedString.alloc().initWithAttributedString(label.attributedText);
@@ -49,12 +39,33 @@ function onLabelTap(args) {
     textContainer.size = label.frame.size;
     var locationOfTouchInLabel = tapGesture.locationInView(label);
     var indexOfCharacter = layoutManager.glyphIndexForPointInTextContainer(locationOfTouchInLabel, textContainer);
+    openUrlAtCharIndex(urls, indexOfCharacter);
+}
+function onLabelTapAndroid(args) {
+    var motionEvent = args.android;
+    var label = args.object;
+    var urls = label.bindingContext;
+    var layout = label.android.getLayout();
+    var x = motionEvent.getX();
+    var y = motionEvent.getY();
+    if (layout) {
+        var line = layout.getLineForVertical(y);
+        var index_1 = layout.getOffsetForHorizontal(line, x);
+        openUrlAtCharIndex(urls, index_1);
+    }
+}
+function openUrlAtCharIndex(urls, charIndex) {
     for (var loop = 0; loop < urls.length; loop++) {
         var url = urls[loop];
-        if (indexOfCharacter >= url.start && indexOfCharacter < url.start + url.length) {
+        if (charIndex >= url.start && charIndex < url.start + url.length) {
             switch (url.platform) {
                 case "newsapps":
-                    openMobileFeedItem(url.href);
+                    frame.topmost().navigate({
+                        moduleName: "view/feed-item",
+                        context: {
+                            id: url.href
+                        }
+                    });
                     break;
                 case "highweb":
                 case "enhancedmobile":
