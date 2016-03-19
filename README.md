@@ -19,7 +19,7 @@ Here are the parameters:
 ### Screenshots
 ![iOS](pics/ios.png?raw=true)
 
-![android](pics/ios.png?raw=true)
+![android](pics/android.png?raw=true)
 
 ### TODO
 * Make Links Work
