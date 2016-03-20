@@ -2,7 +2,7 @@
 var observable_1 = require("data/observable");
 var http = require("http");
 var xml = require("xml");
-var parse_helper_1 = require("../parse-helper");
+var parse_helper_1 = require("../libs/parse-helper/parse-helper");
 var FeedItemModel = (function (_super) {
     __extends(FeedItemModel, _super);
     function FeedItemModel(id, title) {

@@ -2,7 +2,7 @@ import { Observable } from "data/observable";
 import { View } from "ui/core/view";
 import http = require("http");
 import xml = require("xml");
-import { ParseHelper } from "../parse-helper";
+import { ParseHelper } from "../libs/parse-helper/parse-helper";
 
 export class FeedItemModel extends Observable {
     constructor(id: string, title: string) {
