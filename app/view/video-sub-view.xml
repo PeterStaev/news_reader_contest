@@ -1,0 +1,5 @@
+<GridLayout height="200" tap="{{ startVideo }}">
+    <Image stretch="aspectFill" src="{{ posterHref }}" />
+    <Image src="~/images/play-button.png" width="100" stretch="aspectFit" height="200" />
+    <ActivityIndicator busy="{{ isLoadingIn }}" />
+</GridLayout>

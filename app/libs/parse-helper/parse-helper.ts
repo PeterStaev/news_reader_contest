@@ -4,6 +4,9 @@ import { Color } from "color";
 import { FormattedString } from "text/formatted-string";
 import enums = require("ui/enums");
 import xml = require("xml");
+import builder = require("ui/builder");
+import fs = require("file-system");
+import { VideoModel } from "../../model/video";
 
 export interface NewsUrl {
     start?:number;
@@ -28,6 +31,23 @@ export class ParseHelper {
                 return currentItem.content.href;
             }
         }
+    }
+    
+    private static _getVideoModel(id: string): VideoModel {
+        let videoId: string;
+        let posterHref: string;
+        
+        for (let loop = 0; loop < ParseHelper.relations.length; loop++) {
+            let currentItem = ParseHelper.relations[loop];
+            if (currentItem.primaryType === "bbc.mobile.news.video"
+                && currentItem.content.id === id) {
+                videoId = currentItem.content.externalId;
+                posterHref = currentItem.content.relations[0].content.href;
+                break;
+            }
+        }
+        
+        return new VideoModel(videoId, posterHref);
     }
     
     private static _handleStartElement(elementName: string, attr: any) {
@@ -137,6 +157,13 @@ export class ParseHelper {
                 ParseHelper.structure.push(lbl);
                 break;
                 
+            case "video":
+                let videoSubView = builder.load(fs.path.join(fs.knownFolders.currentApp().path, "view/video-sub-view.xml"));
+                let model = ParseHelper._getVideoModel(attr.id);
+                videoSubView.bindingContext = model;
+                ParseHelper.structure.push(videoSubView);
+                break;
+                
             default:
                 console.log(`UNKNOWN TAG ${elementName}`)
                 break;
@@ -180,6 +207,11 @@ export class ParseHelper {
             case "list":
                 let sl: StackLayout = ParseHelper.structure.pop();
                 (<StackLayout>ParseHelper.structure[ParseHelper.structure.length - 1]).addChild(sl);
+                break;
+                
+            case "video":
+                let videoSubView = ParseHelper.structure.pop();
+                (<StackLayout>ParseHelper.structure[ParseHelper.structure.length - 1]).addChild(videoSubView);
                 break;
         }
     }

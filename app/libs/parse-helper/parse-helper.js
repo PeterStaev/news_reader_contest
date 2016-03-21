@@ -5,6 +5,9 @@ var color_1 = require("color");
 var formatted_string_1 = require("text/formatted-string");
 var enums = require("ui/enums");
 var xml = require("xml");
+var builder = require("ui/builder");
+var fs = require("file-system");
+var video_1 = require("../../model/video");
 var ParseHelper = (function () {
     function ParseHelper() {
     }
@@ -17,6 +20,20 @@ var ParseHelper = (function () {
                 return currentItem.content.href;
             }
         }
+    };
+    ParseHelper._getVideoModel = function (id) {
+        var videoId;
+        var posterHref;
+        for (var loop = 0; loop < ParseHelper.relations.length; loop++) {
+            var currentItem = ParseHelper.relations[loop];
+            if (currentItem.primaryType === "bbc.mobile.news.video"
+                && currentItem.content.id === id) {
+                videoId = currentItem.content.externalId;
+                posterHref = currentItem.content.relations[0].content.href;
+                break;
+            }
+        }
+        return new video_1.VideoModel(videoId, posterHref);
     };
     ParseHelper._handleStartElement = function (elementName, attr) {
         var structureTop = ParseHelper.structure[ParseHelper.structure.length - 1];
@@ -109,6 +126,12 @@ var ParseHelper = (function () {
                 lbl.formattedText.spans.push(bullet);
                 ParseHelper.structure.push(lbl);
                 break;
+            case "video":
+                var videoSubView = builder.load(fs.path.join(fs.knownFolders.currentApp().path, "view/video-sub-view.xml"));
+                var model = ParseHelper._getVideoModel(attr.id);
+                videoSubView.bindingContext = model;
+                ParseHelper.structure.push(videoSubView);
+                break;
             default:
                 console.log("UNKNOWN TAG " + elementName);
                 break;
@@ -147,6 +170,10 @@ var ParseHelper = (function () {
             case "list":
                 var sl = ParseHelper.structure.pop();
                 ParseHelper.structure[ParseHelper.structure.length - 1].addChild(sl);
+                break;
+            case "video":
+                var videoSubView = ParseHelper.structure.pop();
+                ParseHelper.structure[ParseHelper.structure.length - 1].addChild(videoSubView);
                 break;
         }
     };
