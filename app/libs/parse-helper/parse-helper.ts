@@ -180,6 +180,10 @@ export class ParseHelper {
             case "listItem":
             case "crosshead":
                 let label: Label = ParseHelper.structure.pop();
+                if (ParseHelper._urls) {
+                    label.bindingContext = ParseHelper._urls.slice();
+                    ParseHelper._urls = null;
+                }
                 (<StackLayout>ParseHelper.structure[ParseHelper.structure.length - 1]).addChild(label);
                 break;
             
@@ -195,10 +199,6 @@ export class ParseHelper {
                 if (ParseHelper.structure[ParseHelper.structure.length - 1] instanceof Span) {
                     let link: Span = ParseHelper.structure.pop();
                     (<Label>ParseHelper.structure[ParseHelper.structure.length - 1]).formattedText.spans.push(link);
-                    if (ParseHelper._urls) {
-                        (<Label>ParseHelper.structure[ParseHelper.structure.length - 1]).bindingContext = ParseHelper._urls.slice();
-                        ParseHelper._urls = null;
-                    }
                 }
                 break;
                 
