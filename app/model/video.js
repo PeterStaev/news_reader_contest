@@ -19,7 +19,8 @@ var VideoModel = (function (_super) {
             return;
         }
         this.set("isLoadingIn", true);
-        http.getJSON("http://open.live.bbc.co.uk/mediaselector/5/select/version/2.0/format/json/mediaset/journalism-http-tablet/vpid/" + this.get("videoId") + "/proto/http/transferformat/hls/")
+        var videoEncoding = (platform.device.os === platform.platformNames.android ? "plain" : "hls");
+        http.getJSON("http://open.live.bbc.co.uk/mediaselector/5/select/version/2.0/format/json/mediaset/journalism-http-tablet/vpid/" + this.get("videoId") + "/proto/http/transferformat/" + videoEncoding + "/")
             .then(function (res) {
             _this.set("isLoadingIn", false);
             var gl = args.object;

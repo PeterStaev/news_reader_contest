@@ -42,7 +42,9 @@ export class ParseHelper {
             if (currentItem.primaryType === "bbc.mobile.news.video"
                 && currentItem.content.id === id) {
                 videoId = currentItem.content.externalId;
-                posterHref = currentItem.content.relations[0].content.href;
+                if (currentItem.content.relations.length) {
+                    posterHref = currentItem.content.relations[0].content.href;
+                }
                 break;
             }
         }

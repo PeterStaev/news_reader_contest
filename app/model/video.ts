@@ -22,7 +22,9 @@ export class VideoModel extends Observable {
         }
         
         this.set("isLoadingIn", true);
-        http.getJSON(`http://open.live.bbc.co.uk/mediaselector/5/select/version/2.0/format/json/mediaset/journalism-http-tablet/vpid/${this.get("videoId")}/proto/http/transferformat/hls/`)
+        
+        let videoEncoding = (platform.device.os === platform.platformNames.android ? "plain" : "hls");
+        http.getJSON(`http://open.live.bbc.co.uk/mediaselector/5/select/version/2.0/format/json/mediaset/journalism-http-tablet/vpid/${this.get("videoId")}/proto/http/transferformat/${videoEncoding}/`)
             .then((res: any) => {
                 this.set("isLoadingIn", false);
 
