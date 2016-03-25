@@ -20,11 +20,6 @@ Here are the parameters:
 ![iOS](pics/ios.gif?raw=true)
 ![android](pics/android.gif?raw=true)
 
-### NOTE
-For iOS the `nativescript-videoplayer` contains a buggy `info.plis` file. In order to be able to build the solution for iOS after `tns prepare` or `npm install` you must **DELETE** the platforms folder in `node_modules/nativescript-videoplayer`!
-
-### TODO
-* Enhance video support for android (seems android fails to play HLS and `.m3u8` files)
 
 
 
