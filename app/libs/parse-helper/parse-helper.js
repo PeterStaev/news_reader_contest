@@ -147,6 +147,10 @@ var ParseHelper = (function () {
             case "listItem":
             case "crosshead":
                 var label = ParseHelper.structure.pop();
+                if (ParseHelper._urls) {
+                    label.bindingContext = ParseHelper._urls.slice();
+                    ParseHelper._urls = null;
+                }
                 ParseHelper.structure[ParseHelper.structure.length - 1].addChild(label);
                 break;
             case "image":
@@ -160,10 +164,6 @@ var ParseHelper = (function () {
                 if (ParseHelper.structure[ParseHelper.structure.length - 1] instanceof span_1.Span) {
                     var link_2 = ParseHelper.structure.pop();
                     ParseHelper.structure[ParseHelper.structure.length - 1].formattedText.spans.push(link_2);
-                    if (ParseHelper._urls) {
-                        ParseHelper.structure[ParseHelper.structure.length - 1].bindingContext = ParseHelper._urls.slice();
-                        ParseHelper._urls = null;
-                    }
                 }
                 break;
             case "caption":

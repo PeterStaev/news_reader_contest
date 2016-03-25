@@ -18,7 +18,6 @@ Here are the parameters:
 
 ### Screenshots
 ![iOS](pics/ios.gif?raw=true)
-
 ![android](pics/android.gif?raw=true)
 
 ### NOTE
